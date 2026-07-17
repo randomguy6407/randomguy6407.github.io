@@ -1,0 +1,423 @@
+/* ════════════════════════════════════════════════════════════════════
+   blog.css — global styles layered on top of lucode-starlight.
+   Sections:
+     1. theme fixes / workarounds for using doc pages as blog posts
+     2. global look & feel (background glow, selection, scrollbar)
+     3. shared post-list / preview-rail / pagination styles
+     4. post-page typography flavor
+   ════════════════════════════════════════════════════════════════════ */
+
+/* ── 1. fixes / workarounds ─────────────────────────────────────────── */
+
+/* Lucode hides the footer on doc pages (rule expects sidebar-driven docs).
+   We're using doc pages as blog posts and want the footer visible. */
+body:has([data-slot='docs']) [data-slot='layout'] > footer {
+	display: flex !important;
+}
+
+/* Sticky header is var(--header-height) tall (3.5rem); Starlight's default
+   scroll-padding rule keys off --sl-nav-height (unset here) so anchor jumps
+   land behind the header. Force a value that uses Lucode's variable. */
+html {
+	scroll-padding-top: calc(var(--header-height) + 1rem) !important;
+}
+
+/* remark-gfm auto-injects an sr-only <h2 id="footnote-label">Footnotes</h2>
+   at the start of its footnotes section. Starlight's ToC picks it up,
+   creating a spurious "Footnotes" entry on top of any author-written
+   footnotes heading. Hide the ToC item for it. */
+.toc li:has(> a[href='#footnote-label']) {
+	display: none;
+}
+
+/* NOTE: global `scroll-behavior: smooth` is deliberately NOT set. In-page
+   anchor scrolling is animated by the rAF loop in TwoColumnContent.astro,
+   which writes scroll positions with `behavior: 'instant'`. If a global
+   smooth rule were present, the browser would re-smooth every one of those
+   per-frame writes, so the real position would lag and lurch to catch up —
+   that was the "teleport" bug. Keep this at the browser default (auto). */
+
+/* Universal scroll-margin so anchor jumps land below the sticky header. */
+:target {
+	scroll-margin-top: calc(var(--header-height) + 1rem);
+}
+
+/* Short posts need trailing scroll room so end-of-page anchors (footnotes,
+   last heading) can actually reach the top of the viewport when clicked.
+   Without this, clicking the [1] footnote ref on a short page hits
+   max-scroll before the target hits scroll-padding-top and the user sees
+   the previous section instead. Only applied on post pages (with-toc); the
+   index/about/tag pages don't have anchor jumps and don't need extra space. */
+.container-main.with-toc .main {
+	padding-bottom: 25vh;
+}
+
+/* Flash animation for footnote round-trip — fires when the URL hash matches
+   either a footnote list item (forward jump) or a footnote ref (back-jump).
+   Plays once on hash change. Intensity bumped high enough to be obvious even
+   when the target is already on screen (e.g. clicking from the page bottom). */
+@keyframes footnote-flash {
+	0% {
+		background: color-mix(in oklab, var(--foreground) 28%, transparent);
+		box-shadow: 0 0 0 4px color-mix(in oklab, var(--foreground) 28%, transparent);
+	}
+	100% {
+		background: transparent;
+		box-shadow: 0 0 0 4px transparent;
+	}
+}
+
+li[id^='user-content-fn-']:target {
+	animation: footnote-flash 2.2s ease-out;
+	border-radius: 4px;
+}
+
+/* Our custom smooth-scroller updates the hash with history.replaceState(),
+   which deliberately avoids a native jump but does not update :target in
+   Chrome. The script adds this class so footnote feedback still fires. */
+li[id^='user-content-fn-'].footnote-flash {
+	animation: footnote-flash 2.2s ease-out;
+	border-radius: 4px;
+}
+
+/* The inline footnote ref is just a number in a <sup>, so highlight the
+   <sup> wrapper rather than the bare <a> to give it visible surface area. */
+sup:has(> a[id^='user-content-fnref-']:target) {
+	animation: footnote-flash 2.2s ease-out;
+	border-radius: 4px;
+	padding: 0 0.25rem;
+}
+
+sup:has(> a[id^='user-content-fnref-'].footnote-flash) {
+	animation: footnote-flash 2.2s ease-out;
+	border-radius: 4px;
+	padding: 0 0.25rem;
+}
+
+/* ── 2. global look & feel ──────────────────────────────────────────── */
+
+/* Subtle vertical glow falling off into the flat page background — keeps
+   the minimal black-gradient identity while giving the page some depth.
+   color-mix on --foreground so it works in both dark and light themes. */
+body {
+	background:
+		radial-gradient(
+			120% 32rem at 50% -8rem,
+			color-mix(in oklab, var(--foreground) 6%, transparent),
+			transparent 70%
+		),
+		var(--background);
+}
+
+::selection {
+	background: color-mix(in oklab, var(--green, var(--foreground)) 30%, transparent);
+}
+
+/* Thin, theme-matched scrollbar. */
+* {
+	scrollbar-width: thin;
+	scrollbar-color: var(--gray-5, var(--border)) transparent;
+}
+
+/* Section labels (e.g. "recent posts" on the homepage) — monospace with a
+   dim `##` prefix, echoing the markdown-source aesthetic. */
+.section-label {
+	font-family: var(--__sl-font-mono, ui-monospace, monospace);
+	font-size: 0.95rem;
+	font-weight: 600;
+	letter-spacing: 0.02em;
+	color: var(--foreground);
+	margin: 0 0 1.25rem;
+}
+.section-label::before {
+	content: '## ';
+	color: var(--muted-foreground);
+	opacity: 0.6;
+}
+
+.all-posts-link {
+	margin-top: 1.75rem;
+	font-size: 0.9rem;
+	font-family: var(--__sl-font-mono, ui-monospace, monospace);
+}
+
+/* Row of favicon links on the about page (rendered from MDX, so global). */
+.icon-links {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.5rem;
+	margin: 0.6rem 0 0;
+}
+
+/* ── 3. shared post-list / preview / pagination ─────────────────────── */
+
+/* small tag chip — used on post pages and post-list rows */
+.tag-chip {
+	display: inline-flex;
+	align-items: center;
+	min-width: 0;
+	max-width: 100%;
+	font-size: 0.72rem;
+	line-height: 1.15;
+	padding: 0.25rem 0.5rem;
+	border: 1px solid var(--border);
+	border-radius: 9999px;
+	color: var(--muted-foreground);
+	text-decoration: none;
+	text-align: left;
+	overflow-wrap: anywhere;
+	word-break: break-word;
+	font-variant-numeric: tabular-nums;
+	transition: border-color 0.15s ease, color 0.15s ease;
+}
+.tag-chip::before {
+	content: '#';
+	opacity: 0.5;
+	margin-right: 0.15ch;
+}
+.tag-chip:hover {
+	border-color: var(--foreground);
+	color: var(--foreground);
+}
+
+/* Looks like a tag chip, but does not pretend that "see all" is a tag. */
+.tag-chip-more::before {
+	content: none;
+}
+
+.tag-filter {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.4rem;
+	margin-bottom: 1.5rem;
+}
+.tag-filter .tag-count {
+	margin-left: 0.3ch;
+	opacity: 0.45;
+	font-size: 0.65rem;
+}
+
+.posts-layout {
+	display: block;
+}
+
+@media (min-width: 1100px) {
+	.posts-layout {
+		display: grid;
+		grid-template-columns: 1fr 14rem;
+		gap: 3rem;
+		align-items: start;
+	}
+}
+
+.post-list {
+	list-style: none;
+	padding: 0;
+	margin: 0;
+	display: flex;
+	flex-direction: column;
+	gap: 1.5rem;
+	min-width: 0;
+}
+.post-list li {
+	display: grid;
+	grid-template-columns: max-content 1fr;
+	column-gap: 1rem;
+	row-gap: 0.25rem;
+	align-items: baseline;
+}
+.post-list li.empty {
+	display: block;
+	color: var(--muted-foreground);
+	font-style: italic;
+}
+.post-list time {
+	font-family: var(--__sl-font-mono, ui-monospace, monospace);
+	font-size: 0.85em;
+	color: var(--muted-foreground);
+	white-space: nowrap;
+	font-variant-numeric: tabular-nums;
+}
+.post-list .row-main {
+	display: flex;
+	flex-direction: column;
+	gap: 0.3rem;
+}
+.post-list .title {
+	font-weight: 600;
+	display: inline-block;
+	color: var(--foreground);
+	text-decoration: none;
+	transition: transform 0.15s ease;
+	transform-origin: left bottom;
+}
+.post-list .title:hover {
+	transform: scale(1.03);
+}
+.post-list .row-main p {
+	margin: 0;
+	color: var(--muted-foreground);
+	font-size: 0.95em;
+}
+.post-row-meta {
+	display: flex;
+	align-items: center;
+	gap: 0.4rem;
+	flex-wrap: wrap;
+	margin-top: 0.15rem;
+}
+.post-row-meta .minutes {
+	font-family: var(--__sl-font-mono, ui-monospace, monospace);
+	font-size: 0.72rem;
+	color: var(--muted-foreground);
+	opacity: 0.8;
+	font-variant-numeric: tabular-nums;
+}
+.post-row-meta:not(:has(*)) {
+	display: none;
+}
+@media (max-width: 480px) {
+	.post-list li {
+		grid-template-columns: 1fr;
+	}
+}
+
+/* page-level pagination ("1 / 3") */
+.page-nav {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 1.5rem;
+	margin-top: 2.5rem;
+	padding-top: 1.5rem;
+	border-top: 1px solid var(--border);
+}
+.page-link {
+	font-size: 0.85rem;
+	color: var(--foreground);
+	text-decoration: none;
+	transition: opacity 0.15s ease;
+}
+.page-link:hover {
+	opacity: 0.7;
+}
+.page-link.disabled {
+	color: var(--muted-foreground);
+	opacity: 0.4;
+	pointer-events: none;
+}
+.page-info {
+	font-size: 0.8rem;
+	color: var(--muted-foreground);
+	font-variant-numeric: tabular-nums;
+	font-family: var(--__sl-font-mono, ui-monospace, monospace);
+}
+
+/* hover/focus preview rail on list pages */
+.post-preview {
+	display: none;
+	min-width: 0;
+}
+
+@media (min-width: 1100px) {
+	.post-preview {
+		display: block;
+		position: sticky;
+		top: calc(var(--header-height, 3.5rem) + 2rem);
+	}
+}
+
+.preview-inner {
+	font-size: 0.82rem;
+	line-height: 1.4;
+	border-left: 1px solid var(--border);
+	padding-left: 1rem;
+}
+
+.preview-heading {
+	font-family: var(--__sl-font-mono, ui-monospace, monospace);
+	font-weight: 500;
+	font-size: 0.78rem;
+	letter-spacing: 0.04em;
+	color: var(--muted-foreground);
+	margin: 0 0 0.75rem 0;
+}
+.preview-heading::before {
+	content: '// ';
+	opacity: 0.6;
+}
+
+.preview-placeholder {
+	color: var(--muted-foreground);
+	font-style: italic;
+	opacity: 0.6;
+	margin: 0;
+}
+
+.preview-toc {
+	display: flex;
+	flex-direction: column;
+	gap: 0.6rem;
+}
+
+.preview-title {
+	font-weight: 600;
+	font-size: 0.88rem;
+	color: var(--foreground);
+	text-decoration: none;
+	overflow-wrap: break-word;
+	word-break: break-word;
+}
+
+.preview-toc ul {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	display: flex;
+	flex-direction: column;
+	gap: 0.45rem;
+}
+
+.preview-toc li {
+	padding-left: calc(var(--depth, 0) * 0.75rem);
+}
+
+.preview-toc a {
+	color: var(--muted-foreground);
+	text-decoration: none;
+	font-size: 0.8rem;
+	opacity: 0.7;
+	transition: opacity 0.15s ease, color 0.15s ease;
+}
+.preview-toc a:hover {
+	opacity: 1;
+	color: var(--foreground);
+}
+
+.preview-toc .preview-desc {
+	color: var(--muted-foreground);
+	font-size: 0.8rem;
+	font-style: italic;
+	opacity: 0.7;
+}
+
+/* ── 4. post-page typography flavor ─────────────────────────────────── */
+
+/* Dim markdown-style prefixes on post headings — quiet nod to the source. */
+.sl-markdown-content h2::before,
+.sl-markdown-content h3::before {
+	font-family: var(--__sl-font-mono, ui-monospace, monospace);
+	color: var(--muted-foreground);
+	opacity: 0.45;
+	font-weight: 400;
+}
+.sl-markdown-content h2::before {
+	content: '## ';
+}
+.sl-markdown-content h3::before {
+	content: '### ';
+}
+/* …but not on the auto-injected sr-only footnotes heading */
+.sl-markdown-content h2#footnote-label::before {
+	content: none;
+}

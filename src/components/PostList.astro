@@ -1,0 +1,46 @@
+---
+import { getPosts, toPostRow, type PostRow } from '../lib/posts';
+
+interface Props {
+	/** Pre-fetched rows (paginated pages pass a slice); fetches when omitted. */
+	posts?: PostRow[];
+	tag?: string;
+	limit?: number;
+}
+const { tag, limit } = Astro.props;
+
+const posts: PostRow[] =
+	Astro.props.posts ??
+	(await getPosts(tag)).slice(0, limit ?? Infinity).map(toPostRow);
+---
+
+<ul class="post-list">
+	{
+		posts.length === 0 && (
+			<li class="empty">no posts {tag ? `tagged #${tag}` : 'yet'}.</li>
+		)
+	}
+	{
+		posts.map((post) => (
+			<li data-post-id={post.id}>
+				<time datetime={post.dateIso}>{post.date}</time>
+				<div class="row-main">
+					<a href={`/${post.id}/`} class="title">
+						{post.title}
+					</a>
+					{post.description && <p>{post.description}</p>}
+					<div class="post-row-meta">
+						{post.minutes !== null && (
+							<span class="minutes">{post.minutes} min</span>
+						)}
+						{post.tags.map((t) => (
+							<a class="tag-chip" href={`/tags/${t}/1/`}>
+								{t}
+							</a>
+						))}
+					</div>
+				</div>
+			</li>
+		))
+	}
+</ul>

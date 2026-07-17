@@ -1,0 +1,38 @@
+---
+import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro';
+import { getTagCounts } from '../../lib/posts';
+
+const allTags = await getTagCounts();
+---
+
+<StarlightPage
+	frontmatter={{
+		title: 'tags',
+		description: 'browse posts by tag.',
+		pagefind: false,
+	}}
+>
+	{
+		allTags.length > 0 ? (
+			<div class="tag-filter" aria-label="all tags">
+				{allTags.map(({ tag, count }) => (
+					<a class="tag-chip" href={`/tags/${tag}/1/`}>
+						{tag}
+						<span class="tag-count">{count}</span>
+					</a>
+				))}
+			</div>
+		) : (
+			<p>no tags yet.</p>
+		)
+	}
+
+	<p class="back-link"><a href="/posts/1/">← all posts</a></p>
+</StarlightPage>
+
+<style>
+	.back-link {
+		margin: 1.5rem 0 0;
+		font-size: 0.9rem;
+	}
+</style>

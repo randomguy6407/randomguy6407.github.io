@@ -1,0 +1,83 @@
+---
+import type { PostRow } from '../lib/posts';
+
+interface Props {
+	posts: PostRow[];
+}
+const { posts } = Astro.props;
+
+// The inline script only needs what it renders — keep the payload small.
+const previewData = posts.map(({ id, title, description, headings }) => ({
+	id,
+	title,
+	description,
+	headings,
+}));
+---
+
+<aside class="post-preview" aria-label="post preview">
+	<div class="preview-inner">
+		<p class="preview-heading">overview</p>
+		<p class="preview-placeholder">hover a post to preview</p>
+		<nav class="preview-toc" hidden>
+			<a class="preview-title" href="#"></a>
+			<ul></ul>
+		</nav>
+	</div>
+</aside>
+
+<script is:inline define:vars={{ previewData }}>
+	const postMap = Object.fromEntries(previewData.map((p) => [p.id, p]));
+
+	function showPreview(tocTitle, tocList, placeholder, tocNav, postId) {
+		const post = postMap[postId];
+		if (!post) return;
+		const href = '/' + post.id + '/';
+		tocTitle.textContent = post.title;
+		tocTitle.href = href;
+		tocList.innerHTML = '';
+		if (post.headings.length > 0) {
+			for (const h of post.headings) {
+				const li = document.createElement('li');
+				li.style.setProperty('--depth', String(h.depth - 2));
+				const a = document.createElement('a');
+				a.href = href + '#' + h.slug;
+				a.textContent = h.text;
+				li.appendChild(a);
+				tocList.appendChild(li);
+			}
+		} else if (post.description) {
+			const li = document.createElement('li');
+			const span = document.createElement('span');
+			span.textContent = post.description;
+			span.className = 'preview-desc';
+			li.appendChild(span);
+			tocList.appendChild(li);
+		}
+		placeholder.hidden = true;
+		tocNav.hidden = false;
+	}
+
+	function setupPreview() {
+		const aside = document.querySelector('.post-preview');
+		if (!aside) return;
+		const placeholder = aside.querySelector('.preview-placeholder');
+		const tocNav = aside.querySelector('.preview-toc');
+		const tocTitle = aside.querySelector('.preview-title');
+		const tocList = aside.querySelector('.preview-toc ul');
+
+		document
+			.querySelectorAll('.post-list li[data-post-id] .title')
+			.forEach((link) => {
+				const show = () => {
+					const li = link.closest('li[data-post-id]');
+					showPreview(tocTitle, tocList, placeholder, tocNav, li.dataset.postId);
+				};
+				// focus alongside mouseenter so keyboard users get the preview too
+				link.addEventListener('mouseenter', show);
+				link.addEventListener('focus', show);
+			});
+	}
+
+	document.addEventListener('astro:page-load', setupPreview);
+</script>

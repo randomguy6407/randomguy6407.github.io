@@ -1,0 +1,19 @@
+{
+  "name": "randomguy-blog",
+  "type": "module",
+  "version": "0.0.1",
+  "scripts": {
+    "dev": "astro dev",
+    "start": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "astro": "astro"
+  },
+  "dependencies": {
+    "@astrojs/starlight": "^0.39.2",
+    "astro": "^6.2.2",
+    "github-slugger": "^2.0.0",
+    "lucode-starlight": "^0.1.2",
+    "sharp": "^0.34.5"
+  }
+}
