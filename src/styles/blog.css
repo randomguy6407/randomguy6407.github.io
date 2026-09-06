@@ -47,8 +47,7 @@ button { background: transparent; }
 .site-header { position: sticky; top: 0; z-index: 10; background: var(--paper); border-bottom: 1px solid var(--line); }
 .header-inner { width: min(1280px, calc(100% - 80px)); min-height: 76px; margin: auto; display: flex; gap: 48px; align-items: center; }
 .wordmark { font-weight: 650; font-size: 19px; letter-spacing: -.7px; text-decoration: none; white-space: nowrap; }
-.wordmark-dot { color: var(--accent); }
-.wordmark-blog { color: var(--muted); font-weight: 400; font-size: 14px; letter-spacing: 0; margin-left: 5px; }
+.wordmark-blog { color: var(--muted); font-weight: 400; }
 .primary-nav { display: flex; align-items: stretch; gap: 26px; align-self: stretch; }
 .primary-nav a { text-decoration: none; font-size: 13px; color: var(--muted); display: flex; gap: 6px; align-items: center; position: relative; }
 .primary-nav a:hover, .primary-nav a[aria-current] { color: var(--ink); }
@@ -77,17 +76,25 @@ kbd { font-family: var(--mono); font-size: 10px; font-weight: 400; background: v
 .text-link { font-size: 12px; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; color: var(--muted); }
 .text-link:hover { color: var(--accent); }
 .post-list { padding: 0; margin: 0; list-style: none; }
-.post-row { padding-block: 27px 28px; border-bottom: 1px solid var(--line); position: relative; }
+.post-row { padding-block: 27px 28px; border-bottom: 1px solid var(--line); position: relative; isolation: isolate; }
 .post-meta-line { display: flex; gap: 11px; align-items: center; font-size: 11px; color: var(--muted); margin-bottom: 12px; }
 .post-meta-line time { font-variant-numeric: tabular-nums; }
 .meta-dot { color: var(--faint); }
 .post-row h3 { font-size: 19px; line-height: 1.5; font-weight: 550; letter-spacing: -.38px; margin-bottom: 9px; padding-right: 24px; }
-.post-row .title { text-decoration: none; }
-.post-row .title:hover { text-decoration: underline; text-decoration-color: var(--accent); }
-.post-row .row-arrow { position: absolute; right: 0; top: 65px; color: var(--faint); transition: color .15s, transform .15s; }
+.post-row .title { display: flow-root; color: inherit; text-decoration: none; user-select: text; }
+/* Stretch the native link over empty space, keeping its text above the hit area
+   so dragging still selects text. Tags remain separate sibling links. */
+.post-card-link::after { content: ''; position: absolute; inset: 0; z-index: 0; }
+.post-card-link > :not(.row-arrow) { position: relative; z-index: 1; }
+.post-card-link:focus-visible { outline: none; }
+.post-card-link:focus-visible::after { outline: 2px solid var(--accent); outline-offset: 5px; }
+.post-row .post-title-text:hover { color: var(--accent); text-decoration: underline; text-decoration-color: var(--accent); }
+.post-row .row-arrow { position: absolute; right: 0; top: 65px; z-index: 1; color: var(--faint); transition: color .15s, transform .15s; }
 .post-row:has(.title:hover) .row-arrow { color: var(--accent); transform: translate(2px, -2px); }
 .post-description { color: var(--muted); font-size: 13px; line-height: 1.8; margin-bottom: 15px; max-width: 96%; }
 .post-tags { display: flex; flex-wrap: wrap; gap: 7px; }
+.post-row .post-tags { position: relative; z-index: 1; pointer-events: none; }
+.post-row .post-tags a { pointer-events: auto; }
 .tag-chip { font-size: 10px; line-height: 1.6; padding: 3px 8px; border: 1px solid var(--line); color: var(--muted); border-radius: 4px; text-decoration: none; display: inline-flex; align-items: center; gap: 7px; }
 .tag-chip:hover, .tag-chip[aria-current] { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
 .tag-count { opacity: .8; font-variant-numeric: tabular-nums; }

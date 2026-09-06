@@ -11,14 +11,33 @@ const posts = Astro.props.posts ?? (await getPosts(tag)).slice(0, limit ?? Infin
 	{posts.length === 0 && <li class="post-row">No posts {tag ? `tagged ${tag}` : 'yet'}.</li>}
 	{posts.map((post) => (
 		<li class="post-row" data-post-id={post.id}>
-			<div class="post-meta-line">
-				<time datetime={post.dateIso}>{post.date}</time>
-				{post.minutes !== null && <><span class="meta-dot" aria-hidden="true">·</span><span>{post.minutes} min read</span></>}
-			</div>
-			<h3><a class="title" href={`/${post.id}/`}>{post.title}</a></h3>
-			<ArrowUpRight class="row-arrow" size={16} aria-hidden="true" />
-			{post.description && <p class="post-description">{post.description}</p>}
+			<a class="title post-card-link" href={`/${post.id}/`} aria-labelledby={`post-title-${post.id}`} draggable="false">
+				<div class="post-meta-line">
+					<time datetime={post.dateIso}>{post.date}</time>
+					{post.minutes !== null && <><span class="meta-dot" aria-hidden="true">·</span><span>{post.minutes} min read</span></>}
+				</div>
+				<h3 id={`post-title-${post.id}`}><span class="post-title-text">{post.title}</span></h3>
+				<ArrowUpRight class="row-arrow" size={16} aria-hidden="true" />
+				{post.description && <p class="post-description">{post.description}</p>}
+			</a>
 			<div class="post-tags">{post.tags.map((tag) => <a class="tag-chip" href={tagUrl(tag)}>{tag}</a>)}</div>
 		</li>
 	))}
 </ul>
+
+<script>
+	document.querySelectorAll<HTMLAnchorElement>('.post-card-link').forEach((link) => {
+		let pointerStart: { x: number; y: number } | undefined;
+		link.addEventListener('pointerdown', (event) => { pointerStart = { x: event.clientX, y: event.clientY }; });
+		link.addEventListener('pointercancel', () => { pointerStart = undefined; });
+		link.addEventListener('click', (event) => {
+			// A text-selection drag can still emit a click on a native link.
+			// Ignore old selections: only suppress a drag from this gesture.
+			const dragged = pointerStart && Math.hypot(event.clientX - pointerStart.x, event.clientY - pointerStart.y) > 4;
+			pointerStart = undefined;
+			if (!dragged || !event.detail || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
+			const selection = window.getSelection();
+			if (selection && !selection.isCollapsed && selection.containsNode(link, true)) event.preventDefault();
+		});
+	});
+</script>

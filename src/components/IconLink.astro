@@ -6,8 +6,8 @@ interface Props {
 	/** Destination. Omit for a non-clickable item (e.g. a Discord handle). */
 	href?: string;
 	label: string;
-	/** Imported favicon (astro:assets optimizes + bundles it locally). */
-	icon: ImageMetadata;
+	/** Imported favicon, or omit and provide an icon in the named slot. */
+	icon?: ImageMetadata;
 }
 const { href, label, icon } = Astro.props;
 const Tag = href ? 'a' : 'span';
@@ -16,7 +16,7 @@ const linkAttrs = href ? { href, target: '_blank', rel: 'noopener noreferrer' } 
 ---
 
 <Tag class="icon-link" {...linkAttrs}>
-	<Image src={icon} alt="" width={40} height={40} class="icon-link__img" loading="lazy" />
+	{icon ? <Image src={icon} alt="" width={40} height={40} class="icon-link__img" loading="lazy" /> : <slot name="icon" />}
 	<span>{label}</span>
 </Tag>
 

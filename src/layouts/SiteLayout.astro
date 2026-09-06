@@ -52,7 +52,7 @@ const canonical = new URL(Astro.url.pathname, Astro.site ?? Astro.url.origin);
 		<a class="skip-link" href="#main">Skip to content</a>
 		<header class="site-header">
 			<div class="header-inner">
-				<a class="wordmark" href="/" aria-label="Randomguy's blog — home">randomguy<span class="wordmark-dot">.</span><span class="wordmark-blog"> / blog</span></a>
+				<a class="wordmark" href="/" aria-label="Randomguy's blog — home">randomguy<span class="wordmark-blog">/blog</span></a>
 				<nav class="primary-nav" aria-label="Main navigation">
 					<a href="/" aria-current={active === 'home' ? 'page' : undefined}>Home</a>
 					<a href="/posts/1/" aria-current={active === 'posts' ? 'page' : undefined}>Posts</a>

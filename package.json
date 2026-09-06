@@ -9,7 +9,8 @@
     "preview": "astro preview",
     "astro": "astro",
     "check": "astro check",
-    "test:browser": "playwright test"
+    "test:browser": "playwright test",
+    "test:navigation": "npm run build && playwright test tests/navigation.spec.ts tests/navigation-layout.spec.ts"
   },
   "dependencies": {
     "@astrojs/mdx": "5.0.4",

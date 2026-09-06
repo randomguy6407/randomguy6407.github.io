@@ -5,10 +5,12 @@ pagefind: false
 ---
 
 import IconLink from '../../components/IconLink.astro';
+import { GitBranch, ShieldCheck } from '@lucide/astro';
 import linkedin from '../../assets/icons/linkedin.png';
 import dreamhack from '../../assets/icons/dreamhack.png';
 import discord from '../../assets/icons/discord.png';
 import f5 from '../../assets/icons/f5.png';
+import nextjs from '../../assets/icons/nextjs.svg';
 
 Hi, i'm zenneth (randomguy6407). I usually main web exploitation in CTFs, while dipping my toes into some binary exploitation.
 
@@ -21,6 +23,8 @@ Currently, this page will be barren since i need to take time to build my portfo
 Some social platform links:
 
 <p class="icon-links">
+	<IconLink href="https://github.com/randomguy6407" label="GitHub"><GitBranch slot="icon" size={17} aria-hidden="true" /></IconLink>
+	<IconLink href="https://hackerone.com/randomguy6407" label="HackerOne"><ShieldCheck slot="icon" size={17} aria-hidden="true" /></IconLink>
 	<IconLink href="https://www.linkedin.com/in/zennethgaw" label="LinkedIn" icon={linkedin} />
 	<IconLink href="https://dreamhack.io/users/87167" label="Dreamhack" icon={dreamhack} />
 	<IconLink label="@randomguy6407" icon={discord} />
@@ -33,3 +37,9 @@ My CVEs:
 </p>
 
 Collaboration with many other researchers to collectively report this vulnerability!
+
+<p class="icon-links">
+	<IconLink href="https://github.com/vercel/next.js/security/advisories/GHSA-955p-x3mx-jcvp" label="CVE-2026-64643 · Next.js" icon={nextjs} />
+</p>
+
+Unauth Server Action IDs leak via publicly served client artifacts
