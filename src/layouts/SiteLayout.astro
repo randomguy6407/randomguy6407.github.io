@@ -44,7 +44,7 @@ const canonical = new URL(Astro.url.pathname, Astro.site ?? Astro.url.origin);
 				try { theme = localStorage.getItem('astra-theme'); } catch {}
 				const dark = theme === 'dark' || (theme !== 'light' && matchMedia('(prefers-color-scheme: dark)').matches);
 				document.documentElement.dataset.theme = dark ? 'dark' : 'light';
-				document.querySelector('meta[name="theme-color"]').content = dark ? '#161819' : '#f8f7f4';
+				document.querySelector('meta[name="theme-color"]').content = dark ? '#181818' : '#f8f7f4';
 			})();
 		</script>
 	</head>
@@ -76,7 +76,7 @@ const canonical = new URL(Astro.url.pathname, Astro.site ?? Astro.url.origin);
 			const applyTheme = (theme: string) => {
 				document.documentElement.dataset.theme = theme;
 				toggle?.setAttribute('aria-label', `Switch to ${theme === 'dark' ? 'light' : 'dark'} theme`);
-				document.querySelector('meta[name="theme-color"]')?.setAttribute('content', theme === 'dark' ? '#161819' : '#f8f7f4');
+				document.querySelector('meta[name="theme-color"]')?.setAttribute('content', theme === 'dark' ? '#181818' : '#f8f7f4');
 			};
 			applyTheme(document.documentElement.dataset.theme ?? 'light');
 			toggle?.addEventListener('click', () => {

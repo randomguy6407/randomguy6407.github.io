@@ -12,6 +12,12 @@ test('desktop visual review in both themes', async ({ page }, testInfo) => {
 	await page.screenshot({ path: testInfo.outputPath('home-dark.png'), fullPage: true });
 	await page.goto('/posts/1/');
 	await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
+	await page.screenshot({ path: testInfo.outputPath('archive-dark.png'), fullPage: true });
+	await page.goto(article);
+	await page.screenshot({ path: testInfo.outputPath('article-dark.png') });
+	await page.locator('#example-poc').scrollIntoViewIfNeeded();
+	await page.screenshot({ path: testInfo.outputPath('article-body-dark.png') });
+	await page.goto('/posts/1/');
 	await page.getByRole('button', { name: 'Switch to light theme' }).click();
 	await page.screenshot({ path: testInfo.outputPath('archive.png'), fullPage: true });
 	await page.goto(article);
