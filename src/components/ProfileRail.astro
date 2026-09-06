@@ -1,0 +1,27 @@
+---
+import { ArrowUpRight, ArrowRight } from '@lucide/astro';
+import { getTagCounts, tagUrl } from '../lib/posts';
+const tags = await getTagCounts();
+interface Props { showBio?: boolean }
+const { showBio = true } = Astro.props;
+---
+<aside class="home-rail" aria-label="About the author and topics">
+	{showBio && <section class="rail-section">
+		<h2 class="rail-heading">About</h2>
+		<p class="rail-name">Hi, I’m Zenneth.</p>
+		<p>I go by randomguy6407. I mainly do web exploitation in CTFs, with some binary exploitation on the side.</p>
+		<a class="text-link" href="/about/">More about me <ArrowRight size={13} /></a>
+	</section>}
+	<section class="rail-section">
+		<h2 class="rail-heading">Elsewhere</h2>
+		<ul class="elsewhere">
+			<li><a href="https://github.com/randomguy6407">GitHub <ArrowUpRight /></a></li>
+			<li><a href="https://dreamhack.io/users/87167">Dreamhack <ArrowUpRight /></a></li>
+			<li><a href="https://www.linkedin.com/in/zennethgaw">LinkedIn <ArrowUpRight /></a></li>
+		</ul>
+	</section>
+	<section class="rail-section">
+		<h2 class="rail-heading">Topics</h2>
+		<div class="rail-topics">{tags.map(({tag}) => <a class="tag-chip" href={tagUrl(tag)}>{tag}</a>)}</div>
+	</section>
+</aside>

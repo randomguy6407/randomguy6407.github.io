@@ -7,13 +7,25 @@
     "start": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "astro": "astro"
+    "astro": "astro",
+    "check": "astro check",
+    "test:browser": "playwright test"
   },
   "dependencies": {
-    "@astrojs/starlight": "^0.39.2",
-    "astro": "^6.2.2",
+    "@astrojs/mdx": "5.0.4",
+    "@astrojs/sitemap": "^3.7.0",
+    "@fontsource-variable/dm-sans": "^5.2.8",
+    "@lucide/astro": "^1.41.0",
+    "astro": "6.2.2",
     "github-slugger": "^2.0.0",
-    "lucode-starlight": "^0.1.2",
-    "sharp": "^0.34.5"
+    "remark-directive": "^4.0.0",
+    "sharp": "^0.34.5",
+    "unist-util-visit": "^5.1.0"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.9",
+    "@axe-core/playwright": "^4.10.2",
+    "@playwright/test": "^1.55.0",
+    "typescript": "^5.9.2"
   }
 }

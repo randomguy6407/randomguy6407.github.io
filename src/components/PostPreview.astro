@@ -1,83 +1,46 @@
 ---
+import { ArrowUpRight } from '@lucide/astro';
 import type { PostRow } from '../lib/posts';
-
-interface Props {
-	posts: PostRow[];
-}
+interface Props { posts: PostRow[] }
 const { posts } = Astro.props;
-
-// The inline script only needs what it renders — keep the payload small.
-const previewData = posts.map(({ id, title, description, headings }) => ({
-	id,
-	title,
-	description,
-	headings,
-}));
+const initial = posts.find((post) => post.headings.length > 0) ?? posts[0];
 ---
-
-<aside class="post-preview" aria-label="post preview">
-	<div class="preview-inner">
-		<p class="preview-heading">overview</p>
-		<p class="preview-placeholder">hover a post to preview</p>
-		<nav class="preview-toc" hidden>
-			<a class="preview-title" href="#"></a>
-			<ul></ul>
-		</nav>
-	</div>
-</aside>
-
-<script is:inline define:vars={{ previewData }}>
-	const postMap = Object.fromEntries(previewData.map((p) => [p.id, p]));
-
-	function showPreview(tocTitle, tocList, placeholder, tocNav, postId) {
-		const post = postMap[postId];
-		if (!post) return;
-		const href = '/' + post.id + '/';
-		tocTitle.textContent = post.title;
-		tocTitle.href = href;
-		tocList.innerHTML = '';
-		if (post.headings.length > 0) {
-			for (const h of post.headings) {
-				const li = document.createElement('li');
-				li.style.setProperty('--depth', String(h.depth - 2));
-				const a = document.createElement('a');
-				a.href = href + '#' + h.slug;
-				a.textContent = h.text;
-				li.appendChild(a);
-				tocList.appendChild(li);
+{initial && (
+	<aside class="post-preview" aria-label="Article preview" data-posts={JSON.stringify(posts)}>
+		<p class="rail-heading">In this post</p>
+		<h2 class="preview-title">{initial.title}</h2>
+		<ul class="preview-outline">{initial.headings.filter((h) => h.depth === 2).map((heading) => <li><a href={`/${initial.id}/#${heading.slug}`}>{heading.text}</a></li>)}</ul>
+		<a class="text-link preview-read" href={`/${initial.id}/`}>Read the post <ArrowUpRight size={13} /></a>
+		<p class="preview-help" style="margin-top: 22px">Hover over a post, or focus its title, for a quick look inside.</p>
+	</aside>
+)}
+<script>
+	const rail = document.querySelector<HTMLElement>('.post-preview');
+	if (rail) {
+		const posts = JSON.parse(rail.dataset.posts ?? '[]') as { id: string; title: string; headings: { depth: number; slug: string; text: string }[] }[];
+		const show = (id: string) => {
+			const post = posts.find((entry) => entry.id === id);
+			if (!post) return;
+			rail.querySelector('.preview-title')!.textContent = post.title;
+			rail.querySelector<HTMLAnchorElement>('.preview-read')!.href = `/${post.id}/`;
+			const list = rail.querySelector('.preview-outline')!;
+			list.replaceChildren();
+			for (const heading of post.headings.filter((h) => h.depth === 2)) {
+				const item = document.createElement('li');
+				const link = document.createElement('a');
+				link.href = `/${post.id}/#${heading.slug}`; link.textContent = heading.text;
+				item.append(link); list.append(item);
 			}
-		} else if (post.description) {
-			const li = document.createElement('li');
-			const span = document.createElement('span');
-			span.textContent = post.description;
-			span.className = 'preview-desc';
-			li.appendChild(span);
-			tocList.appendChild(li);
-		}
-		placeholder.hidden = true;
-		tocNav.hidden = false;
+			if (!list.childElementCount) {
+				const item = document.createElement('li');
+				const link = document.createElement('a');
+				link.href = `/${post.id}/`; link.textContent = 'A short read. Start at the beginning.';
+				item.append(link); list.append(item);
+			}
+		};
+		document.querySelectorAll<HTMLElement>('[data-post-id]').forEach((row) => {
+			row.addEventListener('pointerenter', () => show(row.dataset.postId!));
+			row.addEventListener('focusin', () => show(row.dataset.postId!));
+		});
 	}
-
-	function setupPreview() {
-		const aside = document.querySelector('.post-preview');
-		if (!aside) return;
-		const placeholder = aside.querySelector('.preview-placeholder');
-		const tocNav = aside.querySelector('.preview-toc');
-		const tocTitle = aside.querySelector('.preview-title');
-		const tocList = aside.querySelector('.preview-toc ul');
-
-		document
-			.querySelectorAll('.post-list li[data-post-id] .title')
-			.forEach((link) => {
-				const show = () => {
-					const li = link.closest('li[data-post-id]');
-					showPreview(tocTitle, tocList, placeholder, tocNav, li.dataset.postId);
-				};
-				// focus alongside mouseenter so keyboard users get the preview too
-				link.addEventListener('mouseenter', show);
-				link.addEventListener('focus', show);
-			});
-	}
-
-	document.addEventListener('astro:page-load', setupPreview);
 </script>

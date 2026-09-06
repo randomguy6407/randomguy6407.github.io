@@ -1,0 +1,14 @@
+---
+import { getEntry, render } from 'astro:content';
+import SiteLayout from '../layouts/SiteLayout.astro';
+import ProfileRail from '../components/ProfileRail.astro';
+const about = await getEntry('docs', 'about');
+if (!about) throw new Error('The about page is missing.');
+const { Content } = await render(about);
+---
+<SiteLayout title="About" active="about" description="Hi, I’m Zenneth, also known as randomguy6407. A little about me and the things I work on.">
+	<div class="shell">
+		<header class="page-intro"><h1>About me</h1></header>
+		<div class="about-grid"><article class="prose" data-pagefind-body><Content /></article><ProfileRail showBio={false} /></div>
+	</div>
+</SiteLayout>

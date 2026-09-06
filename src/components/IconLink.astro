@@ -25,11 +25,11 @@ const linkAttrs = href ? { href, target: '_blank', rel: 'noopener noreferrer' } 
 		display: inline-flex;
 		align-items: center;
 		gap: 0.45rem;
-		padding: 0.3rem 0.6rem;
+		padding: 0.55rem 0.7rem;
 		border: 1px solid var(--border);
-		border-radius: 9999px;
+		border-radius: 4px;
 		font-size: 0.85rem;
-		line-height: 1;
+		line-height: 1.4;
 		color: var(--muted-foreground);
 		text-decoration: none;
 		transition: border-color 0.15s ease, color 0.15s ease;
@@ -42,7 +42,9 @@ const linkAttrs = href ? { href, target: '_blank', rel: 'noopener noreferrer' } 
 	span.icon-link {
 		cursor: default;
 	}
-	.icon-link__img {
+	.icon-link .icon-link__img {
+		margin: 0;
+		border: 0;
 		width: 1.05rem;
 		height: 1.05rem;
 		border-radius: 3px;

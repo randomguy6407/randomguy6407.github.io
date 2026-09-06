@@ -1,5 +1,5 @@
 ---
-import { getPosts } from '../../../lib/posts';
+import { getPosts, tagUrl } from '../../../lib/posts';
 
 export async function getStaticPaths() {
 	// Same post filter as the paginated pages — a tag only gets a redirect
@@ -13,5 +13,5 @@ export async function getStaticPaths() {
 }
 
 const { tag } = Astro.params;
-return Astro.redirect(`/tags/${tag}/1/`, 301);
+return Astro.redirect(tagUrl(tag!), 301);
 ---

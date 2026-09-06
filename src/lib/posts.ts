@@ -22,9 +22,11 @@ export async function getPosts(tag?: string): Promise<Post[]> {
 }
 
 export function formatDate(date: Date): string {
-	const d = String(date.getUTCDate()).padStart(2, '0');
-	const m = String(date.getUTCMonth() + 1).padStart(2, '0');
-	return `${d}-${m}-${date.getUTCFullYear()}`;
+	return new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' }).format(date);
+}
+
+export function tagUrl(tag: string, page = 1): string {
+	return `/tags/${encodeURIComponent(tag)}/${page}/`;
 }
 
 export function readingMinutes(body: string | undefined): number | null {

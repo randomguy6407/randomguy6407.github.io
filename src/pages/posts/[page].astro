@@ -1,62 +1,20 @@
 ---
-import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro';
 import type { GetStaticPaths } from 'astro';
-import { getPosts, getTagCounts, toPostRow, PAGE_SIZE } from '../../lib/posts';
-import PostList from '../../components/PostList.astro';
-import PostPreview from '../../components/PostPreview.astro';
-import PageNav from '../../components/PageNav.astro';
+import { getPosts, toPostRow, PAGE_SIZE } from '../../lib/posts';
+import ArchiveLayout from '../../layouts/ArchiveLayout.astro';
 
 export const getStaticPaths = (async () => {
 	const posts = await getPosts();
 	const totalPages = Math.max(1, Math.ceil(posts.length / PAGE_SIZE));
-
 	return Array.from({ length: totalPages }, (_, i) => ({
 		params: { page: String(i + 1) },
 		props: {
 			posts: posts.slice(i * PAGE_SIZE, (i + 1) * PAGE_SIZE).map(toPostRow),
-			pageNum: i + 1,
-			totalPages,
+			pageNum: i + 1, totalPages,
 			prevUrl: i > 0 ? `/posts/${i}/` : null,
 			nextUrl: i < totalPages - 1 ? `/posts/${i + 2}/` : null,
 		},
 	}));
 }) satisfies GetStaticPaths;
-
-const { posts, pageNum, totalPages, prevUrl, nextUrl } = Astro.props;
-const allTags = await getTagCounts();
-const visibleTags = allTags.slice(0, 14);
-const hasMoreTags = allTags.length > visibleTags.length;
 ---
-
-<StarlightPage
-	frontmatter={{
-		title: 'posts',
-		description: 'all posts.',
-		pagefind: false,
-	}}
->
-	{
-		visibleTags.length > 0 && (
-			<div class="tag-filter">
-				{visibleTags.map(({ tag, count }) => (
-					<a class="tag-chip" href={`/tags/${tag}/1/`}>
-						{tag}
-						<span class="tag-count">{count}</span>
-					</a>
-				))}
-				{hasMoreTags && (
-					<a class="tag-chip tag-chip-more" href="/tags/">
-						see all…
-					</a>
-				)}
-			</div>
-		)
-	}
-
-	<div class="posts-layout">
-		<PostList posts={posts} />
-		<PostPreview posts={posts} />
-	</div>
-
-	<PageNav {pageNum} {totalPages} {prevUrl} {nextUrl} />
-</StarlightPage>
+<ArchiveLayout {...Astro.props} />

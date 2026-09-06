@@ -1,65 +1,27 @@
 ---
-import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro';
 import type { GetStaticPaths } from 'astro';
-import { getPosts, toPostRow, PAGE_SIZE, type Post } from '../../../lib/posts';
-import PostList from '../../../components/PostList.astro';
-import PostPreview from '../../../components/PostPreview.astro';
-import PageNav from '../../../components/PageNav.astro';
+import { getPosts, getTagCounts, toPostRow, PAGE_SIZE, tagUrl } from '../../../lib/posts';
+import ArchiveLayout from '../../../layouts/ArchiveLayout.astro';
 
 export const getStaticPaths = (async () => {
-	const sorted = await getPosts();
-
-	const tagMap: Record<string, Post[]> = {};
-	for (const post of sorted) {
-		for (const tag of post.data.tags ?? []) {
-			tagMap[tag] ??= [];
-			tagMap[tag].push(post);
-		}
-	}
-
+	const tags = await getTagCounts();
 	const paths = [];
-	for (const [tag, posts] of Object.entries(tagMap)) {
+	for (const { tag } of tags) {
+		const posts = await getPosts(tag);
 		const totalPages = Math.max(1, Math.ceil(posts.length / PAGE_SIZE));
 		for (let i = 0; i < totalPages; i++) {
 			paths.push({
 				params: { tag, page: String(i + 1) },
 				props: {
-					posts: posts.slice(i * PAGE_SIZE, (i + 1) * PAGE_SIZE).map(toPostRow),
-					pageNum: i + 1,
-					totalPages,
-					prevUrl: i > 0 ? `/tags/${tag}/${i}/` : null,
-					nextUrl: i < totalPages - 1 ? `/tags/${tag}/${i + 2}/` : null,
+					tag, posts: posts.slice(i * PAGE_SIZE, (i + 1) * PAGE_SIZE).map(toPostRow),
+					pageNum: i + 1, totalPages,
+					prevUrl: i > 0 ? tagUrl(tag, i) : null,
+					nextUrl: i < totalPages - 1 ? tagUrl(tag, i + 2) : null,
 				},
 			});
 		}
 	}
 	return paths;
 }) satisfies GetStaticPaths;
-
-const { tag } = Astro.params;
-const { posts, pageNum, totalPages, prevUrl, nextUrl } = Astro.props;
 ---
-
-<StarlightPage
-	frontmatter={{
-		title: `#${tag}`,
-		description: `all posts tagged #${tag}.`,
-		pagefind: false,
-	}}
->
-	<p class="back-link"><a href="/posts/1/">← all posts</a></p>
-
-	<div class="posts-layout">
-		<PostList posts={posts} />
-		<PostPreview posts={posts} />
-	</div>
-
-	<PageNav {pageNum} {totalPages} {prevUrl} {nextUrl} />
-</StarlightPage>
-
-<style>
-	.back-link {
-		margin: 0 0 1.5rem 0;
-		font-size: 0.9rem;
-	}
-</style>
+<ArchiveLayout {...Astro.props} />

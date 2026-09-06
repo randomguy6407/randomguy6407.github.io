@@ -1,51 +1,35 @@
 // @ts-check
 import { defineConfig } from 'astro/config';
-import starlight from '@astrojs/starlight';
-import lucode from 'lucode-starlight';
+import mdx from '@astrojs/mdx';
+import sitemap from '@astrojs/sitemap';
+import remarkDirective from 'remark-directive';
+import { visit } from 'unist-util-visit';
 
-// Where this build is served from. Baked in at build time (canonical URLs, the
-// sitemap, absolute links in /rss.xml), so it comes from the deploy environment
-// rather than being discovered at runtime:
-//   SITE_URL           explicit override, always wins
-//   GITHUB_REPOSITORY  set by GitHub Actions as "owner/repo" → owner.github.io
-//   fallback           local dev and preview builds
-const site = (
-	process.env.SITE_URL ??
+// Render Markdown callouts as semantic asides.
+/** @returns {import('unified').Transformer<import('mdast').Root>} */
+function remarkCallouts() {
+	return (tree) => {
+		visit(tree, 'containerDirective', (node) => {
+			if (!['note', 'tip', 'caution', 'danger'].includes(node.name)) return;
+			node.data = { ...node.data, hName: 'aside', hProperties: { className: ['callout', `callout-${node.name}`] } };
+			const label = node.children[0];
+			if (label?.data && 'directiveLabel' in label.data && label.data.directiveLabel) label.data.hProperties = { className: ['callout-title'] };
+		});
+	};
+}
+
+const site = (process.env.SITE_URL ??
 	(process.env.GITHUB_REPOSITORY
 		? `https://${process.env.GITHUB_REPOSITORY.split('/')[0]}.github.io`
-		: 'http://localhost:4321')
-).replace(/\/+$/, '');
+		: 'http://localhost:4321')).replace(/\/+$/, '');
 
-// https://astro.build/config
 export default defineConfig({
 	site,
-	integrations: [
-		starlight({
-			title: 'Randomguy\'s blog',
-			plugins: [
-				lucode({
-					navLinks: [
-						{ label: 'posts', link: '/posts/1/' },
-						{ label: 'about', link: '/about/' },
-						// Absolute on purpose. lucode passes relative nav links through
-						// Astro's getRelativeLocaleUrl(), which appends a trailing slash;
-						// /rss.xml/ 404s because the feed is a file, not a directory. Its
-						// NavBar leaves http(s):// links untouched.
-						{ label: 'rss', link: `${site}/rss.xml` },
-					],
-					footerText: '© 2026 Randomguy\'s blog · EOF',
-				}),
-			],
-			components: {
-				Sidebar: './src/overrides/Empty.astro',
-				Pagination: './src/overrides/Pagination.astro',
-				PageTitle: './src/overrides/PageTitle.astro',
-				PageSidebar: './src/overrides/PageSidebar.astro',
-				TwoColumnContent: './src/overrides/TwoColumnContent.astro',
-				Head: './src/overrides/Head.astro',
-			},
-			customCss: ['./src/styles/blog.css'],
-			sidebar: [],
-		}),
-	],
+	trailingSlash: 'always',
+	integrations: [mdx(), sitemap()],
+	markdown: {
+		remarkPlugins: [remarkDirective, remarkCallouts],
+		shikiConfig: { themes: { light: 'github-light-high-contrast', dark: 'github-dark-default' }, defaultColor: false, wrap: false },
+	},
+	devToolbar: { enabled: false },
 });

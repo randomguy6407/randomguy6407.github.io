@@ -1,0 +1,25 @@
+---
+import SiteLayout from './SiteLayout.astro';
+import PostList from '../components/PostList.astro';
+import PostPreview from '../components/PostPreview.astro';
+import PageNav from '../components/PageNav.astro';
+import { getTagCounts, tagUrl, type PostRow } from '../lib/posts';
+
+interface Props { posts: PostRow[]; pageNum: number; totalPages: number; prevUrl: string | null; nextUrl: string | null; tag?: string; }
+const { posts, tag, pageNum, totalPages, prevUrl, nextUrl } = Astro.props;
+const tags = await getTagCounts();
+const total = tag ? tags.find((t) => t.tag === tag)?.count ?? 0 : tags.length;
+---
+<SiteLayout title={tag ? `Posts about ${tag}` : 'All posts'} active="posts" description={tag ? `Writing about ${tag} by Zenneth.` : 'All posts by Zenneth about web security, CVEs, and CTFs.'}>
+	<div class="shell">
+		<header class="page-intro"><h1>{tag ? `Posts about ${tag}` : 'All posts'}</h1>{tag && <p>{total} {total === 1 ? 'post' : 'posts'}</p>}</header>
+		<nav class="tag-filter" aria-label="Filter posts by topic">
+			<a class="tag-chip" href="/posts/1/" aria-current={!tag ? 'page' : undefined}>All posts</a>
+			{tags.map(({ tag: item, count }) => <a class="tag-chip" href={tagUrl(item)} aria-current={tag === item ? 'page' : undefined}>{item}<span class="tag-count">{count}</span></a>)}
+		</nav>
+		<div class="archive-grid">
+			<section aria-labelledby="archive-posts"><div class="section-bar"><h2 class="section-heading" id="archive-posts">{tag ? `${tag} posts` : 'Newest first'}</h2>{totalPages > 1 && <span class="archive-count">{pageNum} / {totalPages}</span>}</div><PostList {posts} /><PageNav {pageNum} {totalPages} {prevUrl} {nextUrl} /></section>
+			<PostPreview {posts} />
+		</div>
+	</div>
+</SiteLayout>
