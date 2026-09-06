@@ -135,14 +135,14 @@ kbd { font-family: var(--mono); font-size: 10px; font-weight: 400; background: v
 .prose strong { font-weight: 650; }
 .prose blockquote { border-left: 2px solid var(--accent); margin: 28px 0; padding: 0 0 0 23px; color: var(--muted); }
 .prose :not(pre) > code { font-family: var(--mono); font-size: .8em; padding: 3px 5px; border-radius: 3px; background: var(--surface); color: var(--ink); overflow-wrap: anywhere; }
-.prose pre { font-size: 12px; line-height: 1.9; border: 1px solid var(--line); border-radius: 6px; background: var(--code-background) !important; padding: 22px; overflow-x: auto; margin-block: 26px; tab-size: 2; }
+/* Reserve copy-button space before the progressive enhancement runs. */
+.prose pre { font-size: 12px; line-height: 1.9; border: 1px solid var(--line); border-radius: 6px; background: var(--code-background) !important; padding: 39px 22px 22px; overflow-x: auto; margin-block: 26px; tab-size: 2; }
 .prose pre code { font-family: var(--mono); }
 .astro-code, .astro-code span { color: var(--shiki-light); }
 [data-theme='dark'] .astro-code, [data-theme='dark'] .astro-code span { color: var(--shiki-dark); }
 .code-wrap { position: relative; min-width: 0; }
 .code-copy { display: none; position: absolute; right: 7px; top: 7px; font-size: 10px; padding: 6px 9px; border: 1px solid var(--line); background: var(--panel); }
 .code-wrap:hover .code-copy, .code-wrap:focus-within .code-copy, .code-copy:focus { display: block; }
-.code-wrap pre { padding-top: 39px; }
 .prose img { border: 1px solid var(--line); border-radius: 5px; display: block; margin: 28px auto; }
 .prose table { display: block; overflow: auto; width: 100%; border-collapse: collapse; margin-block: 26px; font-size: 13px; }
 .prose th, .prose td { padding: 10px 14px; border: 1px solid var(--line); text-align: left; }
