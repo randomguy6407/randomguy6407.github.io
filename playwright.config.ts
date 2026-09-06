@@ -13,7 +13,7 @@ export default defineConfig({
 		baseURL: 'http://127.0.0.1:4323',
 		viewport: { width: 1440, height: 1000 },
 		colorScheme: 'light',
-		launchOptions: { executablePath: process.env.CHROME_PATH || '/usr/bin/google-chrome', args: ['--no-sandbox', '--disable-dev-shm-usage'] },
+		launchOptions: { executablePath: process.env.CHROME_PATH || (process.env.CI ? undefined : '/usr/bin/google-chrome'), args: ['--no-sandbox', '--disable-dev-shm-usage'] },
 		screenshot: 'only-on-failure',
 		trace: 'retain-on-failure',
 	},
