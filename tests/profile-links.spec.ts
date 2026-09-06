@@ -20,16 +20,13 @@ for (const width of [320, 390, 1440]) {
 				await expect(link).toHaveAttribute('href', href);
 				await expect(link).toHaveAttribute('target', '_blank');
 				await expect(link).toHaveAttribute('rel', 'noopener noreferrer');
-				if (href === advisory) {
-					const icon = link.locator('img');
-					await expect(icon).toHaveAttribute('alt', '');
-					await expect(icon).toHaveAttribute('src', /\/_astro\/nextjs\..*\.svg$/);
-					await expect(link.locator('svg')).toHaveCount(0);
-					await icon.scrollIntoViewIfNeeded();
-					await expect.poll(() => icon.evaluate((image: HTMLImageElement) => image.complete && image.naturalWidth > 0)).toBe(true);
-				} else {
-					await expect(link.locator('svg[aria-hidden="true"]')).toHaveCount(1);
-				}
+				const icon = link.locator('img');
+				const asset = href === github ? 'github' : href === hackerone ? 'hackerone' : 'nextjs';
+				await expect(icon).toHaveAttribute('alt', '');
+				await expect(icon).toHaveAttribute('src', new RegExp(`/_astro/${asset}\\..*\\.svg$`));
+				await expect(link.locator('svg')).toHaveCount(0);
+				await icon.scrollIntoViewIfNeeded();
+				await expect.poll(() => icon.evaluate((image: HTMLImageElement) => image.complete && image.naturalWidth > 0)).toBe(true);
 			}
 			await expect(content.getByRole('link', { name: /^CVE-/ })).toHaveCount(2);
 			await expect(content.getByRole('link', { name: 'CVE-2026-42533', exact: true })).toHaveAttribute('href', 'https://nvd.nist.gov/vuln/detail/CVE-2026-42533');

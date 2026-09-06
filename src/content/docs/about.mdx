@@ -5,7 +5,8 @@ pagefind: false
 ---
 
 import IconLink from '../../components/IconLink.astro';
-import { GitBranch, ShieldCheck } from '@lucide/astro';
+import github from '../../assets/icons/github.svg';
+import hackerone from '../../assets/icons/hackerone.svg';
 import linkedin from '../../assets/icons/linkedin.png';
 import dreamhack from '../../assets/icons/dreamhack.png';
 import discord from '../../assets/icons/discord.png';
@@ -23,8 +24,8 @@ Currently, this page will be barren since i need to take time to build my portfo
 Some social platform links:
 
 <p class="icon-links">
-	<IconLink href="https://github.com/randomguy6407" label="GitHub"><GitBranch slot="icon" size={17} aria-hidden="true" /></IconLink>
-	<IconLink href="https://hackerone.com/randomguy6407" label="HackerOne"><ShieldCheck slot="icon" size={17} aria-hidden="true" /></IconLink>
+	<IconLink href="https://github.com/randomguy6407" label="GitHub" icon={github} />
+	<IconLink href="https://hackerone.com/randomguy6407" label="HackerOne" icon={hackerone} />
 	<IconLink href="https://www.linkedin.com/in/zennethgaw" label="LinkedIn" icon={linkedin} />
 	<IconLink href="https://dreamhack.io/users/87167" label="Dreamhack" icon={dreamhack} />
 	<IconLink label="@randomguy6407" icon={discord} />
