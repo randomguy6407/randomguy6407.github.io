@@ -1,0 +1,46 @@
+---
+import { ArrowUpRight } from '@lucide/astro';
+import type { PostRow } from '../lib/posts';
+interface Props { posts: PostRow[] }
+const { posts } = Astro.props;
+const initial = posts.find((post) => post.headings.length > 0) ?? posts[0];
+---
+{initial && (
+	<aside class="post-preview" aria-label="Article preview" data-posts={JSON.stringify(posts)}>
+		<p class="rail-heading">In this post</p>
+		<h2 class="preview-title">{initial.title}</h2>
+		<ul class="preview-outline">{initial.headings.filter((h) => h.depth === 2).map((heading) => <li><a href={`/${initial.id}/#${heading.slug}`}>{heading.text}</a></li>)}</ul>
+		<a class="text-link preview-read" href={`/${initial.id}/`}>Read the post <ArrowUpRight size={13} /></a>
+		<p class="preview-help" style="margin-top: 22px">Hover over a post, or focus its title, for a quick look inside.</p>
+	</aside>
+)}
+<script>
+	const rail = document.querySelector<HTMLElement>('.post-preview');
+	if (rail) {
+		const posts = JSON.parse(rail.dataset.posts ?? '[]') as { id: string; title: string; headings: { depth: number; slug: string; text: string }[] }[];
+		const show = (id: string) => {
+			const post = posts.find((entry) => entry.id === id);
+			if (!post) return;
+			rail.querySelector('.preview-title')!.textContent = post.title;
+			rail.querySelector<HTMLAnchorElement>('.preview-read')!.href = `/${post.id}/`;
+			const list = rail.querySelector('.preview-outline')!;
+			list.replaceChildren();
+			for (const heading of post.headings.filter((h) => h.depth === 2)) {
+				const item = document.createElement('li');
+				const link = document.createElement('a');
+				link.href = `/${post.id}/#${heading.slug}`; link.textContent = heading.text;
+				item.append(link); list.append(item);
+			}
+			if (!list.childElementCount) {
+				const item = document.createElement('li');
+				const link = document.createElement('a');
+				link.href = `/${post.id}/`; link.textContent = 'A short read. Start at the beginning.';
+				item.append(link); list.append(item);
+			}
+		};
+		document.querySelectorAll<HTMLElement>('[data-post-id]').forEach((row) => {
+			row.addEventListener('pointerenter', () => show(row.dataset.postId!));
+			row.addEventListener('focusin', () => show(row.dataset.postId!));
+		});
+	}
+</script>

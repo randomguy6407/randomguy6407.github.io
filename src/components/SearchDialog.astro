@@ -1,0 +1,106 @@
+---
+import { Search, X } from '@lucide/astro';
+---
+<dialog id="search-dialog" aria-labelledby="search-title">
+	<div class="search-heading"><h2 id="search-title">Search the blog</h2><button class="icon-button" type="button" data-search-close aria-label="Close search"><X size={20} /></button></div>
+	<div class="search-input-wrap"><Search size={19} /><input id="search-input" type="search" placeholder="Search posts, topics, or a phrase…" aria-label="Search posts" autocomplete="off" spellcheck="false" /></div>
+	<p class="search-status" aria-live="polite">Start typing to search the blog.</p>
+	<ul class="search-results" aria-label="Search results"></ul>
+	<div class="search-footer"><span><kbd>↑</kbd> <kbd>↓</kbd> to navigate <kbd>↵</kbd> to open</span><span><kbd>esc</kbd> to close</span></div>
+</dialog>
+<script>
+	interface Result { title: string; url: string; description: string; body: string; tags: string[] }
+	const dialog = document.querySelector<HTMLDialogElement>('#search-dialog')!;
+	const input = document.querySelector<HTMLInputElement>('#search-input')!;
+	const results = dialog.querySelector<HTMLUListElement>('.search-results')!;
+	const status = dialog.querySelector<HTMLParagraphElement>('.search-status')!;
+	let index: Result[] | undefined;
+	let loading: Promise<Result[]> | undefined;
+	let selected = -1;
+	let sequence = 0;
+	const readIndex = () => {
+		if (index) return Promise.resolve(index);
+		return loading ??= fetch('/search.json').then((response) => {
+			if (!response.ok) throw new Error('Search unavailable');
+			return response.json();
+		}).then((data: Result[]) => index = data).catch((error) => { loading = undefined; throw error; });
+	};
+	const markText = (text: string, words: string[]) => {
+		const fragment = document.createDocumentFragment();
+		const escaped = words.map((word) => word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
+		if (!escaped.length) { fragment.append(text); return fragment; }
+		const pattern = new RegExp(`(${escaped.join('|')})`, 'gi');
+		for (const part of text.split(pattern)) {
+			if (words.some((word) => word.toLowerCase() === part.toLowerCase())) {
+				const mark = document.createElement('mark'); mark.textContent = part; fragment.append(mark);
+			} else fragment.append(part);
+		}
+		return fragment;
+	};
+	async function search() {
+		const request = ++sequence;
+		const query = input.value.trim().toLowerCase();
+		selected = -1;
+		results.replaceChildren();
+		if (!query) { status.textContent = 'Start typing to search the blog.'; return; }
+		status.textContent = 'Searching…';
+		try {
+			const entries = await readIndex();
+			if (request !== sequence) return;
+			const words = query.split(/\s+/).slice(0, 10);
+			const matches = entries.map((entry) => {
+				const title = entry.title.toLowerCase();
+				const text = `${title} ${entry.description} ${entry.tags.join(' ')} ${entry.body}`.toLowerCase();
+				return { entry, score: words.every((word) => text.includes(word)) ? words.reduce((score, word) => score + (title.includes(word) ? 5 : 1), 0) : 0 };
+			}).filter(({ score }) => score > 0).sort((a, b) => b.score - a.score).slice(0, 12);
+			status.textContent = matches.length ? `${matches.length} ${matches.length === 1 ? 'result' : 'results'}` : `No results for “${input.value.trim()}”. Try a topic like “web” or “CTF”.`;
+			for (const { entry } of matches) {
+				const item = document.createElement('li');
+				const link = document.createElement('a'); link.href = entry.url;
+				const title = document.createElement('strong'); title.append(markText(entry.title, words));
+				const excerpt = document.createElement('p');
+				let text = entry.description;
+				if (!words.some((word) => text.toLowerCase().includes(word))) {
+					const offset = Math.max(0, entry.body.toLowerCase().indexOf(words[0]) - 45);
+					text = `${offset ? '…' : ''}${entry.body.slice(offset, offset + 175)}${entry.body.length > offset + 175 ? '…' : ''}`;
+				}
+				excerpt.append(markText(text, words));
+				link.append(title, excerpt); item.append(link); results.append(item);
+			}
+		} catch {
+			if (request === sequence) status.textContent = 'Search could not load. Please try again, or browse Posts in the navigation.';
+		}
+	}
+	function openSearch() {
+		if (dialog.open) return;
+		dialog.showModal(); input.focus();
+		void readIndex().catch(() => {});
+	}
+	document.querySelectorAll('[data-search-open]').forEach((button) => button.addEventListener('click', openSearch));
+	dialog.querySelector('[data-search-close]')?.addEventListener('click', () => dialog.close());
+	dialog.addEventListener('click', (event) => { if (event.target === dialog && (event.offsetX < 0 || event.offsetX > dialog.clientWidth || event.offsetY < 0 || event.offsetY > dialog.clientHeight)) dialog.close(); });
+	input.addEventListener('input', search);
+	document.addEventListener('keydown', (event) => {
+		const editable = event.target instanceof HTMLElement && (event.target.matches('input, textarea, select') || event.target.isContentEditable);
+		if ((event.key.toLowerCase() === 'k' && (event.metaKey || event.ctrlKey)) || (event.key === '/' && !editable && !event.metaKey && !event.ctrlKey && !event.altKey)) {
+			event.preventDefault(); dialog.open ? dialog.close() : openSearch();
+		}
+	});
+	dialog.addEventListener('keydown', (event) => {
+		// A search input consumes Escape to clear its value in some browsers.
+		// Closing the dialog should still take one keypress.
+		if (event.key === 'Escape') { event.preventDefault(); dialog.close(); return; }
+		const links = [...results.querySelectorAll('a')];
+		if (!links.length) return;
+		if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+			event.preventDefault();
+			selected = (selected + (event.key === 'ArrowDown' ? 1 : -1) + links.length) % links.length;
+			links.forEach((link, i) => link.classList.toggle('selected', i === selected));
+			links[selected].focus();
+		} else if (event.key === 'Enter' && document.activeElement === input) {
+			event.preventDefault(); links[Math.max(0, selected)].click();
+		}
+	});
+	const shortcut = document.querySelector('.search-trigger kbd');
+	if (shortcut && !/Mac|iPhone|iPad/.test(navigator.userAgent)) shortcut.textContent = 'Ctrl K';
+</script>

@@ -1,0 +1,89 @@
+---
+import type { GetStaticPaths } from 'astro';
+import { render } from 'astro:content';
+import { ArrowLeft } from '@lucide/astro';
+import SiteLayout from '../../layouts/SiteLayout.astro';
+import { getPosts, toPostRow, tagUrl } from '../../lib/posts';
+
+export const getStaticPaths = (async () => {
+	const posts = await getPosts();
+	return posts.map((post, index) => ({
+		params: { slug: post.id.replace(/^posts\//, '') },
+		props: { post, newer: posts[index - 1] ? toPostRow(posts[index - 1]) : null, older: posts[index + 1] ? toPostRow(posts[index + 1]) : null },
+	}));
+}) satisfies GetStaticPaths;
+const { post, newer, older } = Astro.props;
+const row = toPostRow(post);
+const { Content, headings } = await render(post);
+const outline = headings.filter((heading) => heading.depth >= 2 && heading.depth <= 3 && heading.slug !== 'footnote-label');
+---
+<SiteLayout title={row.title} description={row.description} active="posts" article date={post.data.date}>
+	<div class="shell article-wrap">
+		<a class="breadcrumb" href="/posts/1/"><ArrowLeft size={13} /> All posts</a>
+		<div class="article-grid">
+			<article class="article-content" aria-labelledby="article-title">
+				<header class="article-header" id="article-top">
+					<div class="post-meta-line"><time datetime={row.dateIso}>{row.date}</time><span aria-hidden="true">·</span><span>{row.minutes} min read</span><span aria-hidden="true">·</span><span>By Zenneth</span></div>
+					<h1 id="article-title">{row.title}</h1>
+					{row.description && <p class="article-deck">{row.description}</p>}
+					<div class="post-tags">{row.tags.map((tag) => <a class="tag-chip" href={tagUrl(tag)}>{tag}</a>)}</div>
+				</header>
+				{outline.length > 0 && <details class="mobile-toc"><summary>On this page</summary><nav aria-label="Article contents on mobile"><ol>{outline.map((heading) => <li class:list={{subheading: heading.depth === 3}}><a href={`#${heading.slug}`}>{heading.text}</a></li>)}</ol></nav></details>}
+				<div class="prose" id="article-body"><Content /></div>
+				<footer class="article-end">
+					{(newer || older) && <nav class="adjacent-posts" aria-label="More posts">{newer && <a href={`/${newer.id}/`}><span>← Newer post</span><strong>{newer.title}</strong></a>}{older && <a href={`/${older.id}/`}><span>Older post →</span><strong>{older.title}</strong></a>}</nav>}
+				</footer>
+			</article>
+			{outline.length > 0 && <aside class="article-toc" aria-label="Reading navigation">
+				<h2 class="rail-heading">On this page</h2>
+				<nav aria-label="Article contents"><ol><li><a href="#article-top" aria-current="location">Overview</a></li>{outline.map((heading) => <li class:list={{subheading: heading.depth === 3}}><a href={`#${heading.slug}`}>{heading.text}</a></li>)}</ol></nav>
+				<div class="reading-progress"><div class="progress-label"><span>Your reading progress</span><span data-progress-text>0%</span></div><progress max="100" value="0" aria-label="Reading progress"></progress></div>
+			</aside>}
+		</div>
+	</div>
+</SiteLayout>
+<script>
+	const body = document.querySelector<HTMLElement>('#article-body');
+	const outlineLinks = [...document.querySelectorAll<HTMLAnchorElement>('.article-toc nav a')];
+	const targets = outlineLinks.map((link) => document.getElementById(decodeURIComponent(link.hash.slice(1))));
+	const progress = document.querySelector<HTMLProgressElement>('.reading-progress progress');
+	const progressText = document.querySelector('[data-progress-text]');
+	let scheduled = false;
+	function updateReadingPosition() {
+		scheduled = false;
+		let current = 0;
+		targets.forEach((target, i) => { if (target && target.getBoundingClientRect().top <= 150) current = i; });
+		outlineLinks.forEach((link, i) => { if (i === current) link.setAttribute('aria-current', 'location'); else link.removeAttribute('aria-current'); });
+		if (body && progress) {
+			const rect = body.getBoundingClientRect();
+			const distance = Math.max(1, rect.height - innerHeight + 130);
+			const percent = Math.max(0, Math.min(100, Math.round((130 - rect.top) / distance * 100)));
+			progress.value = percent;
+			if (progressText) progressText.textContent = `${percent}%`;
+		}
+	}
+	const schedule = () => { if (!scheduled) { scheduled = true; requestAnimationFrame(updateReadingPosition); } };
+	addEventListener('scroll', schedule, { passive: true });
+	addEventListener('resize', schedule);
+	addEventListener('load', schedule);
+	updateReadingPosition();
+	const mobileToc = document.querySelector<HTMLDetailsElement>('.mobile-toc');
+	mobileToc?.querySelectorAll('a').forEach((link) => link.addEventListener('click', () => { mobileToc.open = false; }));
+	if (navigator.clipboard) {
+		body?.querySelectorAll('pre').forEach((pre) => {
+			const wrapper = document.createElement('div'); wrapper.className = 'code-wrap';
+			pre.before(wrapper); wrapper.append(pre);
+			pre.tabIndex = 0;
+			pre.setAttribute('aria-label', 'Code example, scroll horizontally for more');
+			const button = document.createElement('button'); button.type = 'button'; button.className = 'code-copy';
+			button.textContent = 'Copy'; button.setAttribute('aria-label', 'Copy code');
+			const feedback = document.createElement('span'); feedback.className = 'sr-only'; feedback.setAttribute('aria-live', 'polite');
+			button.addEventListener('click', async () => {
+				try { await navigator.clipboard.writeText(pre.textContent ?? ''); button.textContent = 'Copied'; feedback.textContent = 'Code copied to clipboard.'; }
+				catch { button.textContent = 'Select code'; feedback.textContent = 'Clipboard unavailable. Select the code to copy it.'; }
+				setTimeout(() => { button.textContent = 'Copy'; }, 2000);
+			});
+			wrapper.append(button, feedback);
+		});
+	}
+</script>

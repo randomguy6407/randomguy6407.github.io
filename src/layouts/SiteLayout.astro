@@ -1,0 +1,94 @@
+---
+import { Search, Sun, Moon } from '@lucide/astro';
+import SearchDialog from '../components/SearchDialog.astro';
+import sansFont from '@fontsource-variable/dm-sans/files/dm-sans-latin-wght-normal.woff2?url';
+import '../styles/fonts.css';
+import '../styles/blog.css';
+
+interface Props {
+	title?: string;
+	description?: string;
+	active?: 'home' | 'posts' | 'about';
+	article?: boolean;
+	date?: Date;
+}
+const {
+	title, description = 'Research, CVEs, CTFs, and some yapping. A personal blog by Zenneth.',
+	active = 'home', article = false, date,
+} = Astro.props;
+const pageTitle = title ? `${title} — Randomguy's blog` : "Randomguy's blog — Research, CTFs, and some yapping";
+const canonical = new URL(Astro.url.pathname, Astro.site ?? Astro.url.origin);
+---
+
+<!doctype html>
+<html lang="en" data-theme="light">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<meta name="description" content={description} />
+		<meta name="color-scheme" content="light dark" />
+		<meta name="theme-color" content="#f8f7f4" />
+		<link rel="preload" href={sansFont} as="font" type="font/woff2" crossorigin="anonymous" />
+		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+		<link rel="canonical" href={canonical} />
+		<meta property="og:title" content={pageTitle} />
+		<meta property="og:description" content={description} />
+		<meta property="og:type" content={article ? 'article' : 'website'} />
+		<meta property="og:url" content={canonical} />
+		<meta property="og:site_name" content="Randomguy's blog" />
+		{date && <meta property="article:published_time" content={date.toISOString()} />}
+		<title>{pageTitle}</title>
+		<script is:inline>
+			(() => {
+				let theme;
+				try { theme = localStorage.getItem('astra-theme'); } catch {}
+				const dark = theme === 'dark' || (theme !== 'light' && matchMedia('(prefers-color-scheme: dark)').matches);
+				document.documentElement.dataset.theme = dark ? 'dark' : 'light';
+				document.querySelector('meta[name="theme-color"]').content = dark ? '#181818' : '#f8f7f4';
+			})();
+		</script>
+	</head>
+	<body>
+		<a class="skip-link" href="#main">Skip to content</a>
+		<header class="site-header">
+			<div class="header-inner">
+				<a class="wordmark" href="/" aria-label="Randomguy's blog — home">randomguy<span class="wordmark-blog">/blog</span></a>
+				<nav class="primary-nav" aria-label="Main navigation">
+					<a href="/" aria-current={active === 'home' ? 'page' : undefined}>Home</a>
+					<a href="/posts/1/" aria-current={active === 'posts' ? 'page' : undefined}>Posts</a>
+					<a href="/about/" aria-current={active === 'about' ? 'page' : undefined}>About</a>
+				</nav>
+				<div class="header-tools">
+					<button type="button" class="search-trigger" data-search-open aria-label="Search the blog" aria-haspopup="dialog"><Search size={16} /><span>Search</span><kbd>⌘ K</kbd></button>
+					<button type="button" class="icon-button theme-toggle" aria-label="Switch to dark theme"><Sun class="sun-icon" size={18} /><Moon class="moon-icon" size={18} /></button>
+				</div>
+			</div>
+		</header>
+		<main id="main" tabindex="-1"><slot /></main>
+		<footer class="site-footer shell">
+			<div><a class="footer-name" href="/">Randomguy's blog</a></div>
+			<div class="footer-links"><span>© {new Date().getFullYear()} Zenneth</span><a href="#main">Back to top ↑</a></div>
+		</footer>
+		<SearchDialog />
+		<script>
+			const toggle = document.querySelector<HTMLButtonElement>('.theme-toggle');
+			const systemTheme = matchMedia('(prefers-color-scheme: dark)');
+			const applyTheme = (theme: string) => {
+				document.documentElement.dataset.theme = theme;
+				toggle?.setAttribute('aria-label', `Switch to ${theme === 'dark' ? 'light' : 'dark'} theme`);
+				document.querySelector('meta[name="theme-color"]')?.setAttribute('content', theme === 'dark' ? '#181818' : '#f8f7f4');
+			};
+			applyTheme(document.documentElement.dataset.theme ?? 'light');
+			toggle?.addEventListener('click', () => {
+				const theme = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+				try { localStorage.setItem('astra-theme', theme); } catch {}
+				applyTheme(theme);
+			});
+			systemTheme.addEventListener('change', (event) => {
+				let explicit;
+				try { explicit = localStorage.getItem('astra-theme'); } catch {}
+				if (!explicit) applyTheme(event.matches ? 'dark' : 'light');
+			});
+		</script>
+	</body>
+</html>

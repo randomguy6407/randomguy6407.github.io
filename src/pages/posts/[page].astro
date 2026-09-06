@@ -1,0 +1,20 @@
+---
+import type { GetStaticPaths } from 'astro';
+import { getPosts, toPostRow, PAGE_SIZE } from '../../lib/posts';
+import ArchiveLayout from '../../layouts/ArchiveLayout.astro';
+
+export const getStaticPaths = (async () => {
+	const posts = await getPosts();
+	const totalPages = Math.max(1, Math.ceil(posts.length / PAGE_SIZE));
+	return Array.from({ length: totalPages }, (_, i) => ({
+		params: { page: String(i + 1) },
+		props: {
+			posts: posts.slice(i * PAGE_SIZE, (i + 1) * PAGE_SIZE).map(toPostRow),
+			pageNum: i + 1, totalPages,
+			prevUrl: i > 0 ? `/posts/${i}/` : null,
+			nextUrl: i < totalPages - 1 ? `/posts/${i + 2}/` : null,
+		},
+	}));
+}) satisfies GetStaticPaths;
+---
+<ArchiveLayout {...Astro.props} />

@@ -1,0 +1,53 @@
+---
+import { Image } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+
+interface Props {
+	/** Destination. Omit for a non-clickable item (e.g. a Discord handle). */
+	href?: string;
+	label: string;
+	/** Imported favicon, or omit and provide an icon in the named slot. */
+	icon?: ImageMetadata;
+}
+const { href, label, icon } = Astro.props;
+const Tag = href ? 'a' : 'span';
+// External profile/reference links: open in a new tab, no referrer leakage.
+const linkAttrs = href ? { href, target: '_blank', rel: 'noopener noreferrer' } : {};
+---
+
+<Tag class="icon-link" {...linkAttrs}>
+	{icon ? <Image src={icon} alt="" width={40} height={40} class="icon-link__img" loading="lazy" /> : <slot name="icon" />}
+	<span>{label}</span>
+</Tag>
+
+<style>
+	.icon-link {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.45rem;
+		padding: 0.55rem 0.7rem;
+		border: 1px solid var(--border);
+		border-radius: 4px;
+		font-size: 0.85rem;
+		line-height: 1.4;
+		color: var(--muted-foreground);
+		text-decoration: none;
+		transition: border-color 0.15s ease, color 0.15s ease;
+	}
+	a.icon-link:hover {
+		border-color: var(--foreground);
+		color: var(--foreground);
+	}
+	/* Non-clickable variant (a bare handle) reads as static, not interactive. */
+	span.icon-link {
+		cursor: default;
+	}
+	.icon-link .icon-link__img {
+		margin: 0;
+		border: 0;
+		width: 1.05rem;
+		height: 1.05rem;
+		border-radius: 3px;
+		flex-shrink: 0;
+	}
+</style>

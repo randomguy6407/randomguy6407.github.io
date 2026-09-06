@@ -1,0 +1,17 @@
+---
+import { getPosts, tagUrl } from '../../../lib/posts';
+
+export async function getStaticPaths() {
+	// Same post filter as the paginated pages — a tag only gets a redirect
+	// here if /tags/<tag>/1/ is actually generated over there.
+	const posts = await getPosts();
+	const tags = new Set<string>();
+	for (const post of posts) {
+		for (const t of post.data.tags ?? []) tags.add(t);
+	}
+	return Array.from(tags).map((tag) => ({ params: { tag } }));
+}
+
+const { tag } = Astro.params;
+return Astro.redirect(tagUrl(tag!), 301);
+---
