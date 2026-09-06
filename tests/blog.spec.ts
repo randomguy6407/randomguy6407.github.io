@@ -151,7 +151,7 @@ test('canonical URLs, redirects and internal destinations', async ({ page, reque
 	for (const route of ['/', '/posts/1/', '/about/', article]) {
 		await page.goto(route);
 		await expect(page.locator('a[href="/rss.xml"], link[type="application/rss+xml"]')).toHaveCount(0);
-		await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href', `http://localhost:4321${route}`);
+		await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href', `${(process.env.SITE_URL || 'http://localhost:4321').replace(/\/+$/, '')}${route}`);
 		const links = await page.locator('a[href^="/"]').evaluateAll((anchors) => anchors.map((anchor) => anchor.getAttribute('href')!.split('#')[0]));
 		links.forEach((link) => destinations.add(link));
 	}
