@@ -5,17 +5,19 @@ import PostList from '../components/PostList.astro';
 import ProfileRail from '../components/ProfileRail.astro';
 import { getPosts, toPostRow } from '../lib/posts';
 const posts = await getPosts();
+// Pinned posts lead the homepage; archives stay chronological.
+const homePosts = [...posts.filter((post) => post.data.pinned), ...posts.filter((post) => !post.data.pinned)];
 ---
 <SiteLayout>
 	<div class="shell">
 		<section class="home-intro" aria-labelledby="intro-title">
-			<h1 id="intro-title">Randomguy’s blog</h1>
-			<p class="intro-description">Research, CVEs, CTFs, and some yapping.</p>
+			<h1 id="intro-title">Research, CVEs, CTFs, and some yapping.</h1>
+			<p class="intro-description">By Zenneth. Mostly web exploitation, with some pwn on the side.</p>
 		</section>
 		<div class="home-grid">
 			<section aria-labelledby="latest-posts">
 				<div class="section-bar"><h2 class="section-heading" id="latest-posts">Recent posts</h2><a class="text-link" href="/posts/1/">All posts <ArrowRight size={13} /></a></div>
-				<PostList posts={posts.slice(0, 5).map(toPostRow)} />
+				<PostList posts={homePosts.slice(0, 5).map(toPostRow)} showPinned />
 			</section>
 			<ProfileRail />
 		</div>

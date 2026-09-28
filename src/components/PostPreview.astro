@@ -1,5 +1,5 @@
 ---
-import { ArrowUpRight } from '@lucide/astro';
+import { ArrowRight } from '@lucide/astro';
 import type { PostRow } from '../lib/posts';
 interface Props { posts: PostRow[] }
 const { posts } = Astro.props;
@@ -10,7 +10,7 @@ const initial = posts.find((post) => post.headings.length > 0) ?? posts[0];
 		<p class="rail-heading">In this post</p>
 		<h2 class="preview-title">{initial.title}</h2>
 		<ul class="preview-outline">{initial.headings.filter((h) => h.depth === 2).map((heading) => <li><a href={`/${initial.id}/#${heading.slug}`}>{heading.text}</a></li>)}</ul>
-		<a class="text-link preview-read" href={`/${initial.id}/`}>Read the post <ArrowUpRight size={13} /></a>
+		<a class="text-link preview-read" href={`/${initial.id}/`}>Read the post <ArrowRight size={13} /></a>
 		<p class="preview-help" style="margin-top: 22px">Hover over a post, or focus its title, for a quick look inside.</p>
 	</aside>
 )}

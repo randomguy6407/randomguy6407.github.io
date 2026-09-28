@@ -36,6 +36,7 @@ Your article starts here.
 ```
 
 Only dated posts with `draft: false` are published in the archives and search.
+Add `pinned: true` to show a post first on the homepage; archives stay chronological.
 The filename determines the URL, so keep it stable after publishing.
 Store article images in `src/assets/` and reference them with relative paths.
 Markdown footnotes, highlighted code blocks, and `:::note[Title]` callouts are supported.

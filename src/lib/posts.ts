@@ -95,6 +95,7 @@ export interface PostRow {
 	tags: string[];
 	minutes: number | null;
 	headings: Heading[];
+	pinned: boolean;
 }
 
 export function toPostRow(post: Post): PostRow {
@@ -108,6 +109,7 @@ export function toPostRow(post: Post): PostRow {
 		tags: post.data.tags ?? [],
 		minutes: readingMinutes(body),
 		headings: extractHeadings(body),
+		pinned: post.data.pinned,
 	};
 }
 

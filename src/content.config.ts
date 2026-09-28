@@ -11,6 +11,7 @@ export const collections = {
 			date: z.coerce.date().optional(),
 			tags: z.array(z.string()).default([]),
 			draft: z.boolean().default(false),
+			pinned: z.boolean().default(false),
 		}),
 	}),
 };

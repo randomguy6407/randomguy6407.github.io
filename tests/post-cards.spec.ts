@@ -165,7 +165,7 @@ for (const width of [390, 1440]) {
 				await page.mouse.move(point.x, point.y);
 				await expect(title, area).toHaveCSS('text-decoration-line', 'none');
 				await expect(title, area).toHaveCSS('color', normalColor);
-				await expect(row.locator('.row-arrow'), area).toHaveCSS('transform', 'matrix(1, 0, 0, 1, 2, -2)');
+				await expect(row.locator('.row-arrow'), area).toHaveCSS('transform', 'matrix(1, 0, 0, 1, 3, 0)');
 				expect(await page.evaluate(({ x, y }) => getComputedStyle(document.elementFromPoint(x, y)!).cursor, point), area).toBe('pointer');
 			}
 			await row.screenshot({ path: testInfo.outputPath('empty-space-hover.png') });

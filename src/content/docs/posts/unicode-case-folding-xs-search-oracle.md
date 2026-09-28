@@ -3,6 +3,7 @@ title: 'Weaponizing unicode case folding and URL inflation to create a new XS-Se
 description: a novel URL inflation gadget — branch-dependent unicode case folding pushes a redirect past chromium's 2 MiB URL limit, turning a query-normalization mistake into a clean cross-origin search oracle.
 date: 2026-02-19
 tags: [web, xs-search, browsers, javascript, unicode]
+pinned: true
 ---
 
 :::note[Ported from Medium]

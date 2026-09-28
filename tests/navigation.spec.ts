@@ -110,7 +110,7 @@ for (const width of [390, 1440]) {
 		await page.locator('.post-row .title').click();
 		await expect(page).toHaveURL(articlePath);
 		const history = [
-			{ route: '/', active: 'Home', heading: 'Randomguy’s blog' },
+			{ route: '/', active: 'Home', heading: 'Research, CVEs, CTFs, and some yapping.' },
 			{ route: '/posts/1/', active: 'Posts', heading: 'All posts' },
 			{ route: '/tags/web/1/', active: 'Posts', heading: 'Posts about web' },
 			{ route: articlePath, active: 'Posts', heading: 'Weaponizing unicode case folding and URL inflation to create a new XS-Search oracle' },
