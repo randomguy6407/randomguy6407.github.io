@@ -28,8 +28,9 @@ for (const width of [320, 390, 1440]) {
 				await icon.scrollIntoViewIfNeeded();
 				await expect.poll(() => icon.evaluate((image: HTMLImageElement) => image.complete && image.naturalWidth > 0)).toBe(true);
 			}
-			await expect(content.getByRole('link', { name: /^CVE-/ })).toHaveCount(2);
-			await expect(content.getByRole('link', { name: 'CVE-2026-42533', exact: true })).toHaveAttribute('href', 'https://nvd.nist.gov/vuln/detail/CVE-2026-42533');
+			// The list grows as CVEs are added to src/data/site.ts, so don't pin its length.
+			expect(await content.getByRole('link', { name: /^CVE-/ }).count()).toBeGreaterThanOrEqual(2);
+			await expect(content.getByRole('link', { name: 'CVE-2026-42533 · nginx', exact: true })).toHaveAttribute('href', 'https://nvd.nist.gov/vuln/detail/CVE-2026-42533');
 			await expect(content.getByText('Unauth Server Action IDs leak via publicly served client artifacts', { exact: true })).toBeVisible();
 			await expect(content.getByText('@randomguy6407', { exact: true })).toBeVisible();
 			await expectNoOverlap(content.locator('.icon-link'));

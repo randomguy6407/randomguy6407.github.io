@@ -26,7 +26,7 @@ const outline = headings.filter((heading) => heading.depth >= 2 && heading.depth
 					<div class="post-meta-line"><time datetime={row.dateIso}>{row.date}</time><span aria-hidden="true">·</span><span>{row.minutes} min read</span><span aria-hidden="true">·</span><span>By Zenneth</span></div>
 					<h1 id="article-title">{row.title}</h1>
 					{row.description && <p class="article-deck">{row.description}</p>}
-					<div class="post-tags">{row.tags.map((tag) => <a class="tag-chip" href={tagUrl(tag)}>{tag}</a>)}</div>
+					<div class="post-tags">{row.tags.map((tag) => <a class="tag-chip" href={tagUrl(tag)}><span class="tag-hash" aria-hidden="true">#</span>{tag}</a>)}</div>
 				</header>
 				{outline.length > 0 && <details class="mobile-toc"><summary>On this page</summary><nav aria-label="Article contents on mobile"><ol>{outline.map((heading) => <li class:list={{subheading: heading.depth === 3}}><a href={`#${heading.slug}`}>{heading.text}</a></li>)}</ol></nav></details>}
 				<div class="prose" id="article-body"><Content /></div>

@@ -11,7 +11,7 @@
 	--border: var(--line); --muted-foreground: var(--muted);
 	font-family: var(--sans); font-size: 16px;
 	background: var(--paper); color: var(--ink);
-	font-synthesis: none; text-rendering: optimizeLegibility;
+	font-synthesis: style; text-rendering: optimizeLegibility;
 	-webkit-font-smoothing: antialiased;
 }
 :root[data-theme='dark'] {
@@ -92,12 +92,16 @@ kbd { font-family: var(--mono); font-size: 10px; font-weight: 400; background: v
 .post-row .post-title-text:hover { color: var(--accent); text-decoration: underline; text-decoration-color: var(--accent); }
 .post-row .row-arrow { position: absolute; right: 0; top: 65px; z-index: 1; color: var(--faint); transition: color .15s, transform .15s; }
 .post-row:has(.title:hover) .row-arrow { color: var(--accent); transform: translate(3px, 0); }
-.post-description { color: var(--muted); font-size: 14px; line-height: 1.8; margin-bottom: 15px; max-width: 96%; }
+.post-description { color: var(--muted); font-size: 14px; line-height: 1.8; margin-bottom: 10px; max-width: 96%; }
 .post-tags { display: flex; flex-wrap: wrap; gap: 7px; }
 .post-row .post-tags { position: relative; z-index: 1; pointer-events: none; }
 .post-row .post-tags a { pointer-events: auto; }
 .tag-chip { font-family: var(--mono); font-size: 11px; line-height: 1.6; padding: 3px 8px; border: 1px solid var(--line); color: var(--muted); border-radius: 4px; text-decoration: none; display: inline-flex; align-items: center; gap: 7px; }
 .tag-chip:hover, .tag-chip[aria-current] { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
+/* Tags are plain text everywhere except the archive filter; the padding only enlarges the tap target. */
+.post-tags { gap: 0 16px; }
+.post-tags .tag-chip, .rail-topics .tag-chip { padding: 4px 0; border: 0; border-radius: 0; gap: 0; }
+.post-tags .tag-chip:hover, .rail-topics .tag-chip:hover { background: none; text-decoration: underline; }
 .tag-count { opacity: .8; font-variant-numeric: tabular-nums; }
 .home-rail { padding-top: 1px; }
 .rail-section { margin-bottom: 31px; }
@@ -108,7 +112,16 @@ kbd { font-family: var(--mono); font-size: 10px; font-weight: 400; background: v
 .elsewhere a { display: flex; align-items: center; justify-content: space-between; text-decoration: none; font-size: 13px; color: var(--muted); }
 .elsewhere a:hover { color: var(--accent); }
 .elsewhere svg { width: 13px; }
-.rail-topics { gap: 7px; display: flex; flex-wrap: wrap; }
+.rail-topics { gap: 2px 16px; display: flex; flex-wrap: wrap; }
+.rail-cves { padding: 0; margin: 0; list-style: none; display: flex; flex-direction: column; gap: 12px; }
+.rail-cves li { display: flex; align-items: center; justify-content: space-between; gap: 12px; font-size: 13px; color: var(--muted); }
+.rail-cves a, .rail-cve-id { flex: none; font-family: var(--mono); font-size: 12px; white-space: nowrap; }
+.rail-cves a { color: var(--accent); }
+/* Long vendor names are cut short rather than wrapping the row. */
+.rail-cve-vendor { display: inline-flex; align-items: center; gap: 7px; min-width: 0; max-width: 100%; }
+.rail-cve-vendor span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rail-cves img { flex: none; width: 15px; height: 15px; border-radius: 3px; }
+.rail-more { margin-top: 18px; }
 .page-intro { padding-block: 67px 39px; }
 .page-intro h1 { font-weight: 600; font-size: 32px; letter-spacing: -.8px; margin: 0 0 12px; line-height: 1.3; }
 .page-intro p { font-size: 14px; color: var(--muted); line-height: 1.8; margin-bottom: 0; }
@@ -131,7 +144,7 @@ kbd { font-family: var(--mono); font-size: 10px; font-weight: 400; background: v
 .article-header { margin-top: 36px; padding-bottom: 31px; border-bottom: 1px solid var(--line); margin-bottom: 32px; }
 .article-header .post-meta-line { margin-bottom: 20px; }
 .article-header h1 { font-size: 32px; font-weight: 600; line-height: 1.35; letter-spacing: -.75px; margin-bottom: 20px; overflow-wrap: anywhere; }
-.article-deck { font-size: 15px; line-height: 1.85; color: var(--muted); margin-bottom: 21px; }
+.article-deck { font-size: 15px; line-height: 1.85; color: var(--muted); margin-bottom: 15px; }
 .prose { font-size: 16px; line-height: 1.95; overflow-wrap: break-word; }
 .prose p { margin: 0 0 23px; }
 .prose h2 { font-size: 23px; line-height: 1.45; font-weight: 550; letter-spacing: -.5px; margin: 49px 0 20px; }
@@ -193,6 +206,7 @@ progress::-moz-progress-bar { background: var(--accent); }
 .tag-directory a { display: flex; justify-content: space-between; padding-block: 23px; border-bottom: 1px solid var(--line); text-decoration: none; font-size: 15px; }
 .tag-directory span { color: var(--muted); font-size: 12px; }
 .empty-page { padding-block: 95px; max-width: 640px; }
+.empty-mark { display: block; width: 64px; height: 64px; margin-bottom: 26px; }
 .empty-page h1 { font-size: 32px; font-weight: 600; margin-bottom: 22px; }
 .empty-page p { color: var(--muted); line-height: 1.85; font-size: 15px; }
 .empty-page .text-link { color: var(--accent); margin-top: 12px; }
@@ -232,6 +246,7 @@ mark { background: var(--accent-soft); color: var(--accent); }
 	.home-grid, .archive-grid, .article-grid, .about-grid { grid-template-columns: 1fr; gap: 40px; }
 	.home-rail { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-top: 10px; }
 	.home-rail .rail-section:last-child { display: none; }
+	.rail-cves li { flex-direction: column; align-items: flex-start; gap: 3px; }
 	.home-intro { padding-block: 56px 45px; }
 	.post-preview, .article-toc { display: none; }
 	.article-header h1 { font-size: 30px; max-width: 660px; }

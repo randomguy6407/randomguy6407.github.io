@@ -5,13 +5,12 @@ pagefind: false
 ---
 
 import IconLink from '../../components/IconLink.astro';
+import CveList from '../../components/CveList.astro';
 import github from '../../assets/icons/github.svg';
 import hackerone from '../../assets/icons/hackerone.svg';
 import linkedin from '../../assets/icons/linkedin.png';
 import dreamhack from '../../assets/icons/dreamhack.png';
 import discord from '../../assets/icons/discord.png';
-import f5 from '../../assets/icons/f5.png';
-import nextjs from '../../assets/icons/nextjs.svg';
 
 Hi, i'm zenneth (randomguy6407). I usually main web exploitation in CTFs, while dipping my toes into some binary exploitation.
 
@@ -31,16 +30,6 @@ Some social platform links:
 	<IconLink label="@randomguy6407" icon={discord} />
 </p>
 
-My CVEs:
+<p id="cves">My CVEs:</p>
 
-<p class="icon-links">
-	<IconLink href="https://nvd.nist.gov/vuln/detail/CVE-2026-42533" label="CVE-2026-42533" icon={f5} />
-</p>
-
-Collaboration with many other researchers to collectively report this vulnerability!
-
-<p class="icon-links">
-	<IconLink href="https://github.com/vercel/next.js/security/advisories/GHSA-955p-x3mx-jcvp" label="CVE-2026-64643 · Next.js" icon={nextjs} />
-</p>
-
-Unauth Server Action IDs leak via publicly served client artifacts
+<CveList />

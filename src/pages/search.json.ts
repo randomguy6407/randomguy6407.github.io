@@ -1,5 +1,6 @@
 import { getEntry } from 'astro:content';
 import { getPosts } from '../lib/posts';
+import { cves } from '../data/site';
 
 export async function GET() {
 	const entries = [...await getPosts()];
@@ -13,6 +14,8 @@ export async function GET() {
 	return Response.json(entries.map((entry) => ({
 		title: entry.id === 'about' ? 'About Zenneth' : entry.data.title,
 		url: `/${entry.id}/`, description: entry.data.description ?? '',
-		body: plain(entry.body), tags: entry.data.tags,
+		// The About page renders its CVE list from data, so index that text too.
+		body: entry.id === 'about' ? `${plain(entry.body)} ${cves.map((cve) => `${cve.id} ${cve.vendor} ${cve.note}`).join(' ')}` : plain(entry.body),
+		tags: entry.data.tags,
 	})));
 }

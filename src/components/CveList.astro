@@ -1,0 +1,12 @@
+---
+import IconLink from './IconLink.astro';
+import { cves } from '../data/site';
+// The About page lists every CVE in the order they were found.
+const list = [...cves].reverse();
+---
+{list.map((cve) => (
+	<Fragment>
+		<p class="icon-links"><IconLink href={cve.href} label={`${cve.id} · ${cve.vendor}`} icon={cve.icon} /></p>
+		<p>{cve.note}</p>
+	</Fragment>
+))}

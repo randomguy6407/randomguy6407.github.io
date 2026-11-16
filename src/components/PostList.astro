@@ -21,7 +21,7 @@ const posts = Astro.props.posts ?? (await getPosts(tag)).slice(0, limit ?? Infin
 				<ArrowRight class="row-arrow" size={16} aria-hidden="true" />
 				{post.description && <p class="post-description">{post.description}</p>}
 			</a>
-			<div class="post-tags">{post.tags.map((tag) => <a class="tag-chip" href={tagUrl(tag)}>{tag}</a>)}</div>
+			<div class="post-tags">{post.tags.map((tag) => <a class="tag-chip" href={tagUrl(tag)}><span class="tag-hash" aria-hidden="true">#</span>{tag}</a>)}</div>
 		</li>
 	))}
 </ul>
